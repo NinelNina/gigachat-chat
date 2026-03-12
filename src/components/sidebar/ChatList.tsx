@@ -19,11 +19,11 @@ export const ChatList: React.FC<ChatListProps> = ({
                                                   }) => {
     if (chats.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center h-32 text-center px-4">
-                <p className="text-[var(--color-text-muted)] text-sm">
+            <div className="flex flex-col items-center justify-center h-32 text-center px-3 sm:px-4">
+                <p className="text-sm sm:text-base text-[var(--color-text-muted)]">
                     Нет активных чатов
                 </p>
-                <p className="text-[var(--color-text-muted)] text-xs mt-1">
+                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] mt-1">
                     Создайте новый чат, чтобы начать общение
                 </p>
             </div>
@@ -31,7 +31,7 @@ export const ChatList: React.FC<ChatListProps> = ({
     }
 
     return (
-        <div className="space-y-1 overflow-y-auto flex-1">
+        <div className="space-y-1 overflow-y-auto">
             {chats.map((chat) => (
                 <ChatItem
                     key={chat.id}

@@ -22,7 +22,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                                             }) => {
     const [localSettings, setLocalSettings] = useState<Settings>(settings);
 
-    // Sync with parent settings when panel opens
     React.useEffect(() => {
         setLocalSettings(settings);
     }, [settings, isOpen]);
@@ -55,33 +54,40 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 aria-hidden="true"
             />
 
-            {/* Panel */}
-            <div className="fixed right-0 top-0 h-full w-96 bg-[var(--color-sidebar-bg)] border-l border-[var(--color-border)] shadow-2xl z-50 overflow-y-auto animate-slide-left">
-                {/* Header */}
-                <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-[var(--color-border)] bg-[var(--color-sidebar-bg)]/80 backdrop-blur-md">
-                    <h2 className="text-xl font-bold text-[var(--color-text)]">
+            {/* Panel - адаптивная ширина */}
+            <div
+                className={`
+                    fixed right-0 top-0 h-full z-50 
+                    overflow-y-auto animate-slide-left
+                    bg-[var(--color-sidebar-bg)] border-l border-[var(--color-border)] shadow-2xl
+                    w-full xs:w-[380px] sm:w-[420px] md:w-[450px] lg:w-[480px] xl:w-[500px] 2xl:w-[550px]
+                `}
+            >
+                {/* Header - адаптивный */}
+                <div className="sticky top-0 z-10 flex items-center justify-between p-3 xs:p-4 sm:p-5 border-b border-[var(--color-border)] bg-[var(--color-sidebar-bg)]/80 backdrop-blur-md">
+                    <h2 className="text-lg xs:text-xl sm:text-2xl font-bold text-[var(--color-text)]">
                         Настройки
                     </h2>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-[var(--color-hover)] rounded-xl transition-colors text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+                        className="p-1.5 xs:p-2 hover:bg-[var(--color-hover)] rounded-lg xs:rounded-xl transition-colors text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
                         aria-label="Закрыть"
                     >
-                        <X size={20} />
+                        <X size={18} className="xs:w-5 xs:h-5" />
                     </button>
                 </div>
 
-                {/* Content */}
-                <div className="p-6 space-y-6">
+                {/* Content - адаптивные отступы */}
+                <div className="p-3 xs:p-4 sm:p-5 md:p-6 space-y-4 xs:space-y-5 sm:space-y-6">
                     {/* Model Selection */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-[var(--color-text-secondary)]">
+                    <div className="space-y-1.5 xs:space-y-2">
+                        <label className="text-xs xs:text-sm font-medium text-[var(--color-text-secondary)]">
                             Модель
                         </label>
                         <select
                             value={localSettings.model}
                             onChange={(e) => handleChange('model', e.target.value)}
-                            className="w-full p-2.5 border border-[var(--color-border)] rounded-xl bg-[var(--color-input-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/50 transition-colors"
+                            className="w-full p-2 xs:p-2.5 text-sm xs:text-base border border-[var(--color-border)] rounded-lg xs:rounded-xl bg-[var(--color-input-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/50 transition-colors"
                         >
                             <option value="GigaChat">GigaChat</option>
                             <option value="GigaChat-Plus">GigaChat-Plus</option>
@@ -111,8 +117,8 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                     />
 
                     {/* Max Tokens */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-[var(--color-text-secondary)]">
+                    <div className="space-y-1.5 xs:space-y-2">
+                        <label className="text-xs xs:text-sm font-medium text-[var(--color-text-secondary)]">
                             Max Tokens
                         </label>
                         <input
@@ -121,21 +127,21 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                             onChange={(e) => handleChange('maxTokens', parseInt(e.target.value) || 0)}
                             min={1}
                             max={4000}
-                            className="w-full p-2.5 border border-[var(--color-border)] rounded-xl bg-[var(--color-input-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/50 transition-colors"
+                            className="w-full p-2 xs:p-2.5 text-sm xs:text-base border border-[var(--color-border)] rounded-lg xs:rounded-xl bg-[var(--color-input-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/50 transition-colors"
                             placeholder="Введите количество токенов"
                         />
                     </div>
 
                     {/* System Prompt */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-[var(--color-text-secondary)]">
+                    <div className="space-y-1.5 xs:space-y-2">
+                        <label className="text-xs xs:text-sm font-medium text-[var(--color-text-secondary)]">
                             System Prompt
                         </label>
                         <textarea
                             value={localSettings.systemPrompt}
                             onChange={(e) => handleChange('systemPrompt', e.target.value)}
                             rows={4}
-                            className="w-full p-2.5 border border-[var(--color-border)] rounded-xl bg-[var(--color-input-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/50 resize-none placeholder-[var(--color-text-muted)] transition-colors"
+                            className="w-full p-2 xs:p-2.5 text-sm xs:text-base border border-[var(--color-border)] rounded-lg xs:rounded-xl bg-[var(--color-input-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/50 resize-none placeholder-[var(--color-text-muted)] transition-colors"
                             placeholder="Введите системный промпт..."
                         />
                     </div>

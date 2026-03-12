@@ -1,5 +1,97 @@
 @import "tailwindcss";
 
+/* Кастомные брейкпоинты */
+@theme {
+  --breakpoint-2xs: 320px;
+  --breakpoint-xs: 375px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1440px;
+}
+
+/* Адаптивные контейнеры */
+.container-custom {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Адаптивные классы для 320px */
+@media (min-width: 320px) {
+  .\32xs\:block {
+    display: block;
+  }
+  .\32xs\:hidden {
+    display: none;
+  }
+  .\32xs\:p-1 {
+    padding: 0.25rem;
+  }
+  .\32xs\:p-2 {
+    padding: 0.5rem;
+  }
+  .\32xs\:text-xs {
+    font-size: 0.75rem;
+  }
+}
+
+@media (min-width: 375px) {
+  .container-custom {
+    max-width: 375px;
+  }
+}
+
+@media (min-width: 640px) {
+  .container-custom {
+    max-width: 640px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .container-custom {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-custom {
+    max-width: 1024px;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container-custom {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .container-custom {
+    max-width: 1440px;
+  }
+}
+
+@media (max-width: 340px) {
+  .hide-on-tiny {
+    display: none;
+  }
+
+  .text-tiny {
+    font-size: 0.7rem;
+  }
+
+  .button-tiny {
+    padding: 0.25rem 0.5rem;
+  }
+}
 /* Базовые CSS переменные для светлой темы (по умолчанию) */
 :root {
   /* Основные цвета */
