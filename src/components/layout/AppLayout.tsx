@@ -1,7 +1,7 @@
 import React from 'react';
 import { Sidebar } from '../sidebar/Sidebar';
 import { ChatWindow } from '../chat/ChatWindow';
-//import { SettingsPanel } from '../settings/SettingsPanel';
+import { SettingsPanel } from '../settings/SettingsPanel';
 import type {Chat, Message, Settings} from '../../types';
 
 interface AppLayoutProps {
@@ -34,7 +34,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                                                         settings,
                                                         isTyping,
                                                         isGenerating,
-                                                        //isSettingsOpen,
+                                                        isSettingsOpen,
                                                         isSidebarOpen,
                                                         onNewChat,
                                                         onSearchChange,
@@ -42,6 +42,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                                                         onSendMessage,
                                                         onStopGeneration,
                                                         onOpenSettings,
+                                                        onCloseSettings,
+                                                        onSaveSettings,
+                                                        onResetSettings,
                                                         onToggleSidebar,
                                                     }) => {
     const activeChat = chats.find(chat => chat.id === activeChatId);
@@ -79,6 +82,15 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 onStopGeneration={onStopGeneration}
                 onOpenSettings={onOpenSettings}
                 onToggleSidebar={onToggleSidebar}
+            />
+
+            {/* Settings Panel */}
+            <SettingsPanel
+                isOpen={isSettingsOpen}
+                onClose={onCloseSettings}
+                settings={settings}
+                onSave={onSaveSettings}
+                onReset={onResetSettings}
             />
         </div>
     );
