@@ -1,35 +1,274 @@
 @import "tailwindcss";
 
+/* Базовые CSS переменные для светлой темы (по умолчанию) */
 :root {
+  /* Основные цвета */
   --color-bg: #ffffff;
   --color-text: #1a1a1a;
-  --color-sidebar-bg: #f5f5f5;
+  --color-text-secondary: #4b5563;
+  --color-text-muted: #6b7280;
+
+  /* Фоны */
+  --color-sidebar-bg: #f9fafb;
   --color-chat-bg: #ffffff;
-  --color-message-user: #007bff;
-  --color-message-assistant: #f0f0f0;
-  --color-border: #e0e0e0;
-  --color-hover: #e8e8e8;
+  --color-input-bg: #f3f4f6;
+  --color-hover: #f3f4f6;
+
+  /* Сообщения */
+  --color-message-user: #2563eb;
+  --color-message-user-text: #ffffff;
+  --color-message-assistant: #ffffff;
+  --color-message-assistant-text: #1a1a1a;
+
+  /* Границы */
+  --color-border: #e5e7eb;
+  --color-border-light: #f3f4f6;
+
+  /* Акценты */
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+
+  /* Статусы */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
 }
 
+/* Тёмная тема */
 .dark {
-  --color-bg: #1a1a1a;
-  --color-text: #ffffff;
-  --color-sidebar-bg: #2d2d2d;
-  --color-chat-bg: #1a1a1a;
-  --color-message-user: #0056b3;
-  --color-message-assistant: #2d2d2d;
-  --color-border: #404040;
-  --color-hover: #3d3d3d;
+  /* Основные цвета */
+  --color-bg: #111827; /* Более глубокий темный фон */
+  --color-text: #f3f4f6;
+  --color-text-secondary: #9ca3af;
+  --color-text-muted: #6b7280;
+
+  /* Фоны */
+  --color-sidebar-bg: #1f2937; /* Темно-серый для сайдбара */
+  --color-chat-bg: #111827; /* Основной фон чата */
+  --color-input-bg: #374151; /* Фон для полей ввода */
+  --color-hover: #374151; /* Ховер эффект */
+
+  /* Сообщения */
+  --color-message-user: #3b82f6; /* Ярче для контраста */
+  --color-message-user-text: #ffffff;
+  --color-message-assistant: #1f2937; /* Темно-серый для сообщений ассистента */
+  --color-message-assistant-text: #f3f4f6;
+
+  /* Границы */
+  --color-border: #374151; /* Темные границы */
+  --color-border-light: #1f2937;
+
+  /* Акценты */
+  --color-accent: #3b82f6;
+  --color-accent-hover: #2563eb;
+
+  /* Статусы */
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
 }
 
+/* Глобальные стили */
 * {
-  margin: 0;
-  padding: 0;
+  /* Убираем сброс отступов, оставляем только box-sizing */
   box-sizing: border-box;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background-color: var(--color-bg);
   color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Скроллбар для тёмной темы */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Темная тема для скроллбара */
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Плавные переходы для смены темы */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Фокус стили */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Стили для кода */
+pre {
+  background: #f1f5f9;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.dark pre {
+  background: #1f2937;
+  color: #f3f4f6;
+}
+
+code {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.875em;
+}
+
+/* Стили для ссылок */
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Стили для выделения текста */
+::selection {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+/* Настройка темы Tailwind 4 */
+@theme {
+  /* Базовые отступы */
+  --spacing: 0.25rem;
+
+  /* Отступы */
+  --spacing-0: 0px;
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+
+  /* Цвета из CSS переменных */
+  --color-bg: var(--color-bg);
+  --color-text: var(--color-text);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+  --color-sidebar-bg: var(--color-sidebar-bg);
+  --color-chat-bg: var(--color-chat-bg);
+  --color-input-bg: var(--color-input-bg);
+  --color-hover: var(--color-hover);
+  --color-border: var(--color-border);
+  --color-border-light: var(--color-border-light);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-message-user: var(--color-message-user);
+  --color-message-user-text: var(--color-message-user-text);
+  --color-message-assistant: var(--color-message-assistant);
+  --color-message-assistant-text: var(--color-message-assistant-text);
+}
+
+/* Кастомные утилиты */
+@utility container-padding {
+  padding: var(--spacing-5);
+}
+
+@utility section-gap {
+  margin-bottom: var(--spacing-6);
+}
+
+/* Кастомные брейкпоинты для адаптива */
+@screen xs {
+  /* 375px - 639px */
+  @media (min-width: 375px) {
+    /* Стили для xs */
+  }
+}
+
+@screen sm {
+  /* 640px - 767px */
+}
+
+@screen md {
+  /* 768px - 1023px */
+}
+
+@screen lg {
+  /* 1024px - 1279px */
+}
+
+@screen xl {
+  /* 1280px - 1535px */
+}
+
+@screen 2xl {
+  /* 1536px+ */
+}
+
+/* Адаптивные классы-хелперы */
+.text-responsive {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+}
+
+.p-responsive {
+  padding: clamp(0.75rem, 3vw, 1.5rem);
+}
+
+/* Анимации для мобильного меню */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.fade-in {
+  animation: fadeIn 0.2s ease-out;
 }

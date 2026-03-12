@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Slider } from '../ui/Slider';
 import { Toggle } from '../ui/Toggle';
-import type {Settings} from '../../types';
+import type { Settings } from '../../types';
 
 interface SettingsPanelProps {
     isOpen: boolean;
@@ -50,18 +50,22 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         <>
             {/* Overlay */}
             <div
-                className="fixed inset-0 bg-black/50 z-50"
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity"
                 onClick={onClose}
+                aria-hidden="true"
             />
 
             {/* Panel */}
-            <div className="fixed right-0 top-0 h-full w-96 bg-white dark:bg-gray-900 shadow-xl z-50 overflow-y-auto">
+            <div className="fixed right-0 top-0 h-full w-96 bg-[var(--color-sidebar-bg)] border-l border-[var(--color-border)] shadow-2xl z-50 overflow-y-auto animate-slide-left">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
-                    <h2 className="text-xl font-bold dark:text-white">Настройки</h2>
+                <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-[var(--color-border)] bg-[var(--color-sidebar-bg)]/80 backdrop-blur-md">
+                    <h2 className="text-xl font-bold text-[var(--color-text)]">
+                        Настройки
+                    </h2>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                        className="p-2 hover:bg-[var(--color-hover)] rounded-xl transition-colors text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+                        aria-label="Закрыть"
                     >
                         <X size={20} />
                     </button>
@@ -71,13 +75,13 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 <div className="p-6 space-y-6">
                     {/* Model Selection */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium dark:text-white">
+                        <label className="text-sm font-medium text-[var(--color-text-secondary)]">
                             Модель
                         </label>
                         <select
                             value={localSettings.model}
                             onChange={(e) => handleChange('model', e.target.value)}
-                            className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
+                            className="w-full p-2.5 border border-[var(--color-border)] rounded-xl bg-[var(--color-input-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/50 transition-colors"
                         >
                             <option value="GigaChat">GigaChat</option>
                             <option value="GigaChat-Plus">GigaChat-Plus</option>
@@ -86,7 +90,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                         </select>
                     </div>
 
-                    {/* Temperature */}
+                    {/* Temperature - используем компонент Slider */}
                     <Slider
                         label="Temperature"
                         value={localSettings.temperature}
@@ -96,7 +100,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                         step={0.1}
                     />
 
-                    {/* Top-P */}
+                    {/* Top-P - используем компонент Slider */}
                     <Slider
                         label="Top-P"
                         value={localSettings.topP}
@@ -108,7 +112,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
                     {/* Max Tokens */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium dark:text-white">
+                        <label className="text-sm font-medium text-[var(--color-text-secondary)]">
                             Max Tokens
                         </label>
                         <input
@@ -117,25 +121,26 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                             onChange={(e) => handleChange('maxTokens', parseInt(e.target.value) || 0)}
                             min={1}
                             max={4000}
-                            className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
+                            className="w-full p-2.5 border border-[var(--color-border)] rounded-xl bg-[var(--color-input-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/50 transition-colors"
+                            placeholder="Введите количество токенов"
                         />
                     </div>
 
                     {/* System Prompt */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium dark:text-white">
+                        <label className="text-sm font-medium text-[var(--color-text-secondary)]">
                             System Prompt
                         </label>
                         <textarea
                             value={localSettings.systemPrompt}
                             onChange={(e) => handleChange('systemPrompt', e.target.value)}
                             rows={4}
-                            className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-white resize-none"
+                            className="w-full p-2.5 border border-[var(--color-border)] rounded-xl bg-[var(--color-input-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/50 resize-none placeholder-[var(--color-text-muted)] transition-colors"
                             placeholder="Введите системный промпт..."
                         />
                     </div>
 
-                    {/* Theme Toggle */}
+                    {/* Theme Toggle - используем компонент Toggle */}
                     <Toggle
                         label="Тёмная тема"
                         checked={localSettings.theme === 'dark'}
@@ -144,7 +149,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-gray-200 dark:border-gray-800 flex gap-3">
+                <div className="sticky bottom-0 p-5 border-t border-[var(--color-border)] bg-[var(--color-sidebar-bg)]/80 backdrop-blur-md flex gap-3">
                     <Button
                         onClick={handleReset}
                         variant="secondary"
