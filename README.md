@@ -1,73 +1,46 @@
-# React + TypeScript + Vite
+# Gemini Chat App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Это приложение для чата с ИИ на базе Gemini API, построенное с использованием React, Vite и Tailwind CSS.
 
-Currently, two official plugins are available:
+## Функциональность
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Мультимодальный чат с поддержкой текста и файлов.
+- История чатов с сохранением в `localStorage`.
+- Адаптивный дизайн с боковой панелью.
+- Кастомизированное отображение сообщений с поддержкой Markdown и подсветкой синтаксиса.
 
-## React Compiler
+## Локальный запуск приложения
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Предустановки:**  Node.js
 
-## Expanding the ESLint configuration
+1. Установите зависимости:
+   `npm install`
+2. Введите в `GEMINI_API_KEY` в [.env.local](.env.local) или при входе в приложение ваш ключ к Gemini API
+3. Запустите приложение:
+   `npm run dev`
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Тестирование
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Проект покрыт автоматическими тестами с использованием **Vitest** и **React Testing Library**.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Запуск тестов
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Вы можете запустить тесты с помощью следующей команды:
+`npm test`
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Покрытие тестов
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **Reducer Unit Tests**: тестирование ключевой бизнес-логики управления состоянием (добавление/удаление чатов и сообщений) в файле `src/store/chatReducer.test.ts`.
+- **Component Tests**:
+    - `InputArea`: проверка отправки сообщений, работы горячих клавиш (Enter) и блокировки пустого ввода.
+    - `Message`: проверка корректного рендеринга вариантов пользователя/ассистента и наличия функциональных кнопок.
+    - `Sidebar`: проверка фильтрации чатов через поиск и подтверждения удаления чата.
+- **Persistence Tests**: тестирование утилиты сохранения данных в `localStorage` (включая обработку ошибок и невалидных данных).
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Технологический стек
+
+- **Vite** — система сборки.
+- **Tailwind CSS** — стилизация.
+- **Vitest** — тестовый фреймворк.
+- **Lucide React** — иконки.
+- **Motion** — анимации.

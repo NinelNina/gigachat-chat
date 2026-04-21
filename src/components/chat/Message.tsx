@@ -108,21 +108,23 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
                         </div>
                     </div>
 
-                    <button
-                        onClick={handleCopy}
-                        className={`absolute top-0 ${isUser ? 'left-0 -translate-x-full -ml-3' : 'right-0 translate-x-full ml-3'}
-                opacity-0 group-hover:opacity-100 transition-all p-2
-                bg-[var(--color-input-bg)] hover:bg-[var(--color-hover)]
-                border border-[var(--color-border)] rounded-lg shadow-sm
-                text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]`}
-                        title="Копировать"
-                    >
-                        {copied ? (
-                            <Check size={14} className="text-green-500" />
-                        ) : (
-                            <Copy size={14} />
-                        )}
-                    </button>
+                    {!isUser && (
+                        <button
+                            onClick={handleCopy}
+                            className={`absolute top-0 right-0 translate-x-full ml-3
+                  opacity-0 group-hover:opacity-100 transition-all p-2
+                  bg-[var(--color-input-bg)] hover:bg-[var(--color-hover)]
+                  border border-[var(--color-border)] rounded-lg shadow-sm
+                  text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]`}
+                            title="Копировать"
+                        >
+                            {copied ? (
+                                <Check size={14} className="text-green-500" />
+                            ) : (
+                                <Copy size={14} />
+                            )}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
