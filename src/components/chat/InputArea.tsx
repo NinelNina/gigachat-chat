@@ -1,142 +1,162 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Send, Square, Paperclip } from 'lucide-react';
-import { Button } from '../ui/Button';
 
 interface InputAreaProps {
-    onSendMessage: (message: string) => void;
-    onStopGeneration?: () => void;
-    isLoading?: boolean;
-    disabled?: boolean;
+  onSendMessage: (message: string, files?: { mimeType: string; data: string; name: string }[]) => void;
+  onStopGeneration?: () => void;
+  isLoading?: boolean;
+  disabled?: boolean;
 }
 
 export const InputArea: React.FC<InputAreaProps> = ({
-                                                        onSendMessage,
-                                                        onStopGeneration,
-                                                        isLoading = false,
-                                                        disabled = false,
-                                                    }) => {
-    const [input, setInput] = useState('');
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const [showScrollbar, setShowScrollbar] = useState(false);
+  onSendMessage,
+  onStopGeneration,
+  isLoading = false,
+  disabled = false,
+}) => {
+  const [input, setInput] = useState('');
+  const [attachedFiles, setAttachedFiles] = useState<{ mimeType: string; data: string; name: string }[]>([]);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-    React.useEffect(() => {
-        if (textareaRef.current) {
-            // Сбрасываем высоту перед вычислением
-            textareaRef.current.style.height = 'auto';
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      const scrollHeight = textareaRef.current.scrollHeight;
+      textareaRef.current.style.height = `${Math.min(scrollHeight, 200)}px`;
+      
+      if (scrollHeight > 200) {
+        textareaRef.current.style.overflowY = 'auto';
+      } else {
+        textareaRef.current.style.overflowY = 'hidden';
+      }
+    }
+  }, [input]);
 
-            // Вычисляем новую высоту
-            const scrollHeight = textareaRef.current.scrollHeight;
-            const newHeight = Math.min(scrollHeight, 100);
+  const handleSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if ((input.trim() || attachedFiles.length > 0) && !disabled && !isLoading) {
+      onSendMessage(input.trim(), attachedFiles);
+      setInput('');
+      setAttachedFiles([]);
+    }
+  };
 
-            // Устанавливаем высоту
-            textareaRef.current.style.height = `${newHeight}px`;
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
 
-            // Показываем скроллбар только если контент превышает maxHeight
-            setShowScrollbar(scrollHeight > 100);
-        }
-    }, [input]);
+    const newFiles: { mimeType: string; data: string; name: string }[] = [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const reader = new FileReader();
+      
+      const filePromise = new Promise<{ mimeType: string; data: string; name: string }>((resolve) => {
+        reader.onload = (event) => {
+          const result = event.target?.result as string;
+          const base64Data = result.split(',')[1];
+          resolve({
+            mimeType: file.type,
+            data: base64Data,
+            name: file.name
+          });
+        };
+      });
+      
+      reader.readAsDataURL(file);
+      newFiles.push(await filePromise);
+    }
 
-    // Дополнительный эффект для сброса скроллбара при очистке
-    React.useEffect(() => {
-        if (!input && textareaRef.current) {
-            textareaRef.current.style.height = 'auto';
-            setShowScrollbar(false);
-        }
-    }, [input]);
+    setAttachedFiles(prev => [...prev, ...newFiles]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
-    const handleSubmit = () => {
-        if (input.trim() && !disabled && !isLoading) {
-            onSendMessage(input.trim());
-            setInput('');
-            // Сброс скроллбара после отправки
-            setShowScrollbar(false);
-            if (textareaRef.current) {
-                textareaRef.current.style.height = 'auto';
-            }
-        }
-    };
+  const removeFile = (index: number) => {
+    setAttachedFiles(prev => prev.filter((_, i) => i !== index));
+  };
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleSubmit();
-        }
-    };
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
 
-    return (
-        <div className="px-2 xs:px-3 sm:px-4 py-2 xs:py-3 sm:py-4">
-            {/* Убрали items-end, добавили items-center */}
-            <div className="flex items-center gap-1 xs:gap-2">
-                {/* Кнопка прикрепления */}
-                <button
-                    className="hidden xs:block p-2 xs:p-2.5 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-hover)] rounded-lg xs:rounded-xl transition-all flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Прикрепить файл"
-                    disabled={disabled || isLoading}
+  return (
+    <div className="px-4 py-4 border-t border-[var(--color-border)] bg-[var(--color-sidebar-bg)]/50 backdrop-blur-sm">
+      <div className="max-w-4xl mx-auto">
+        {attachedFiles.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {attachedFiles.map((file, i) => (
+              <div key={i} className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-lg px-2 py-1 text-xs text-blue-500">
+                <span className="truncate max-w-[150px]">{file.name}</span>
+                <button 
+                  onClick={() => removeFile(i)}
+                  className="hover:text-red-500 transition-colors"
                 >
-                    <Paperclip size={16} className="xs:w-[18px] xs:h-[18px]" />
+                  <Square size={10} fill="currentColor" />
                 </button>
+              </div>
+            ))}
+          </div>
+        )}
 
-                {/* Textarea */}
-                <div className="flex-1 min-w-0 relative">
-                <textarea
-                    ref={textareaRef}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Сообщение..."
-                    disabled={disabled || isLoading}
-                    rows={1}
-                    className={`
-                        w-full bg-[var(--color-input-bg)] border border-[var(--color-border)]
-                        rounded-lg xs:rounded-xl py-2 xs:py-2.5 px-3 xs:px-4
-                        text-xs xs:text-sm text-[var(--color-text)]
-                        placeholder-[var(--color-text-muted)]
-                        focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/50
-                        resize-none disabled:opacity-50 disabled:cursor-not-allowed
-                        transition-all duration-200
-                        textarea-autoresize
-                        ${showScrollbar ? 'show-scrollbar' : 'hide-scrollbar'}
-                      `}
-                />
-                </div>
+        <form onSubmit={handleSubmit} className="flex items-end gap-2">
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileChange} 
+            className="hidden" 
+            multiple 
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="p-2.5 text-[var(--color-text-muted)] hover:text-blue-500 hover:bg-blue-500/10 rounded-xl transition-all flex-shrink-0 disabled:opacity-50"
+            disabled={disabled || isLoading}
+          >
+            <Paperclip size={20} />
+          </button>
 
-                {/* Send/Stop Button */}
-                {isLoading ? (
-                    <Button
-                        onClick={onStopGeneration}
-                        variant="danger"
-                        size="sm"
-                        className="flex-shrink-0 px-2 xs:px-3 sm:px-4 py-2 xs:py-2.5 text-xs xs:text-sm bg-red-500 hover:bg-red-600 text-white border-0 rounded-lg xs:rounded-xl"
-                    >
-                        <Square size={14} className="xs:w-4 xs:h-4 sm:mr-1" />
-                        <span className="hidden xs:inline">Стоп</span>
-                    </Button>
-                ) : (
-                    <Button
-                        onClick={handleSubmit}
-                        disabled={!input.trim() || disabled}
-                        variant="primary"
-                        size="sm"
-                        className="flex-shrink-0 px-2 xs:px-3 sm:px-4 py-2 xs:py-2.5 text-xs xs:text-sm bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white border-0 rounded-lg xs:rounded-xl"
-                    >
-                        <Send size={14} className="xs:w-4 xs:h-4 sm:mr-1" />
-                    </Button>
-                )}
+          <div className="flex-1 min-w-0 relative">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Спросите Gemini..."
+              disabled={disabled || isLoading}
+              rows={1}
+              className="w-full bg-[var(--color-input-bg)] border border-[var(--color-border)] rounded-xl py-3 px-4 pr-12 text-sm text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none disabled:opacity-50 transition-all max-h-[200px]"
+            />
+            
+            <div className="absolute right-3 bottom-2.5">
+              {isLoading ? (
+                <button
+                  type="button"
+                  onClick={onStopGeneration}
+                  className="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors shadow-lg shadow-red-500/20"
+                >
+                  <Square size={14} fill="currentColor" />
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={(!input.trim() && attachedFiles.length === 0) || disabled}
+                  className="p-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20 disabled:shadow-none"
+                >
+                  <Send size={14} />
+                </button>
+              )}
             </div>
-
-            {/* Подсказка */}
-            <div className="hidden xs:flex items-center justify-center gap-1 sm:gap-2 text-xs text-[var(--color-text-muted)] mt-2">
-                <span>Enter</span>
-                <kbd className="px-1.5 py-0.5 bg-[var(--color-input-bg)] border border-[var(--color-border)] rounded text-[10px] sm:text-xs">
-                    ↵
-                </kbd>
-                <span className="hidden sm:inline">- отправить,</span>
-                <span className="sm:hidden">- отпр,</span>
-                <kbd className="px-1.5 py-0.5 bg-[var(--color-input-bg)] border border-[var(--color-border)] rounded text-[10px] sm:text-xs">
-                    ⇧+↵
-                </kbd>
-                <span>- новая строка</span>
-            </div>
+          </div>
+        </form>
+        
+        <div className="text-[10px] text-center text-[var(--color-text-muted)] mt-2 opacity-50 uppercase tracking-widest font-bold">
+          Shift + Enter для новой строки • Gemini может ошибаться
         </div>
-    );
+      </div>
+    </div>
+  );
 };

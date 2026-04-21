@@ -1,98 +1,71 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sidebar } from '../sidebar/Sidebar';
 import { ChatWindow } from '../chat/ChatWindow';
 import { SettingsPanel } from '../settings/SettingsPanel';
-import type { Chat, Settings } from '../../types';
-import { mockMessagesByChatId } from '../../mocks/data';
+import { useChat } from '../../app/providers/ChatProvider';
+import { Settings } from '../../types';
+import { saveThemeToStorage, loadThemeFromStorage } from '../../utils/storage';
 
+const DEFAULT_SETTINGS: Settings = {
+  model: 'gemini-3-flash-preview',
+  temperature: 0.7,
+  topP: 0.9,
+  maxTokens: 2000,
+  systemPrompt: 'Вы — полезный ассистент.',
+  theme: 'light',
+};
 
 interface AppLayoutProps {
-    chats: Chat[];
-    activeChatId: string | null;
-    searchQuery: string;
-    settings: Settings;
-    isSettingsOpen: boolean;
-    isSidebarOpen: boolean;
-    onNewChat: () => void;
-    onSearchChange: (query: string) => void;
-    onSelectChat: (id: string) => void;
-    onSendMessage: (message: string) => void;
-    //onStopGeneration: () => void;
-    onOpenSettings: () => void;
-    onCloseSettings: () => void;
-    onSaveSettings: (settings: Settings) => void;
-    onResetSettings: () => void;
-    onToggleSidebar: () => void;
+  apiKey: string;
 }
 
-export const AppLayout: React.FC<AppLayoutProps> = ({
-                                                        chats,
-                                                        activeChatId,
-                                                        searchQuery,
-                                                        settings,
-                                                        isSettingsOpen,
-                                                        isSidebarOpen,
-                                                        onNewChat,
-                                                        onSearchChange,
-                                                        onSelectChat,
-                                                        onSendMessage,
-                                                        //onStopGeneration,
-                                                        onOpenSettings,
-                                                        onCloseSettings,
-                                                        onSaveSettings,
-                                                        onResetSettings,
-                                                        onToggleSidebar,
-                                                    }) => {
-    const activeChat = chats.find(chat => chat.id === activeChatId);
-    const initialMessages = activeChat
-        ? mockMessagesByChatId[activeChat.id] || []
-        : [];
+export const AppLayout: React.FC<AppLayoutProps> = ({ apiKey }) => {
+  const { state, dispatch } = useChat();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settings, setSettings] = useState<Settings>(() => {
+     const savedTheme = loadThemeFromStorage();
+     return { ...DEFAULT_SETTINGS, theme: savedTheme || DEFAULT_SETTINGS.theme };
+  });
 
-    // Apply theme using CSS variables
-    useEffect(() => {
-        if (settings.theme === 'dark') {
-            document.documentElement.classList.add('dark');
-            // Также устанавливаем data-атрибут для дополнительной совместимости
-            document.documentElement.setAttribute('data-theme', 'dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-            document.documentElement.setAttribute('data-theme', 'light');
-        }
-    }, [settings.theme]);
+  useEffect(() => {
+    if (settings.theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    saveThemeToStorage(settings.theme);
+  }, [settings.theme]);
 
-    return (
-        <div className="flex h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
-            {/* Sidebar */}
-            <Sidebar
-                chats={chats}
-                activeChatId={activeChatId}
-                searchQuery={searchQuery}
-                onNewChat={onNewChat}
-                onSearchChange={onSearchChange}
-                onSelectChat={onSelectChat}
-                isOpen={isSidebarOpen}
-                onClose={onToggleSidebar}
-            />
+  const handleSaveSettings = (newSettings: Settings) => {
+    setSettings(newSettings);
+  };
 
-            {/* Main Chat Area */}
-            <ChatWindow
-                key={activeChatId}
-                chatTitle={activeChat?.title || 'Новый чат'}
-                initialMessages={initialMessages}
-                onSendMessage={onSendMessage}
-                //onStopGeneration={onStopGeneration}
-                onOpenSettings={onOpenSettings}
-                onToggleSidebar={onToggleSidebar}
-            />
+  const handleResetSettings = () => {
+    setSettings(DEFAULT_SETTINGS);
+  };
 
-            {/* Settings Panel */}
-            <SettingsPanel
-                isOpen={isSettingsOpen}
-                onClose={onCloseSettings}
-                settings={settings}
-                onSave={onSaveSettings}
-                onReset={onResetSettings}
-            />
-        </div>
-    );
+  return (
+    <div className="flex h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
+      <Sidebar 
+        isOpen={isSidebarOpen} 
+        onClose={() => setIsSidebarOpen(false)} 
+      />
+
+      <ChatWindow
+        apiKey={apiKey}
+        settings={settings}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
+      />
+
+      <SettingsPanel
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        settings={settings}
+        onSave={handleSaveSettings}
+        onReset={handleResetSettings}
+      />
+    </div>
+  );
 };

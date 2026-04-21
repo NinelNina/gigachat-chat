@@ -1,141 +1,153 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings, Menu } from 'lucide-react';
 import { MessageList } from './MessageList';
 import { InputArea } from './InputArea';
-import type { Message as MessageType } from '../../types';
+import { useChat } from '../../app/providers/ChatProvider';
+import { sendMessageToGemini } from '../../api/gemini';
+import type { Message, Settings as ChatSettings } from '../../types';
 
 interface ChatWindowProps {
-    chatTitle: string;
-    initialMessages?: MessageType[];
-    onSendMessage: (message: string) => void;
-    //onStopGeneration?: () => void;
-    onOpenSettings: () => void;
-    onToggleSidebar?: () => void;
+  onOpenSettings: () => void;
+  onToggleSidebar: () => void;
+  apiKey: string;
+  settings: ChatSettings;
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({
-                                                          chatTitle,
-                                                          initialMessages = [],
-                                                          onSendMessage,
-                                                          //onStopGeneration,
-                                                          onOpenSettings,
-                                                          onToggleSidebar,
-                                                      }) => {
+  onOpenSettings,
+  onToggleSidebar,
+  apiKey,
+  settings,
+}) => {
+  const { state, dispatch } = useChat();
+  const [currentChat, setCurrentChat] = useState(() => 
+    state.chats.find(c => c.id === state.activeChatId) || null
+  );
 
-    const [isDark] = React.useState(() => {
-        const saved = localStorage.getItem('theme');
-        return saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    });
+  useEffect(() => {
+    setCurrentChat(state.chats.find(c => c.id === state.activeChatId) || null);
+  }, [state.activeChatId, state.chats]);
 
-    React.useEffect(() => {
-        if (isDark) {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-        }
-    }, [isDark]);
+  const handleSendMessage = async (content: string, files?: { mimeType: string; data: string; name: string }[]) => {
+    if (!state.activeChatId || !apiKey) return;
 
-    const [messages, setMessages] = useState<MessageType[]>(initialMessages);
-    const [isLoading, setIsLoading] = useState(false);
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      content: content || (files && files.length > 0 ? "Отправлены файлы" : ""),
+      role: 'user',
+      timestamp: new Date().toISOString(),
+      attachments: files,
+    };
 
-    const handleSendMessage = (content: string) => {
-        const userMessage: MessageType = {
-            id: Date.now().toString(),
-            content,
-            role: 'user',
-            timestamp: new Date(),
-        };
+    dispatch({ type: 'ADD_MESSAGE', payload: { chatId: state.activeChatId, message: userMessage } });
+    
+    if (currentChat && currentChat.messages.length === 0) {
+      const newTitle = content.length > 35 ? content.substring(0, 35) + '...' : (content || 'Новое вложение');
+      dispatch({ 
+        type: 'UPDATE_CHAT', 
+        payload: { id: state.activeChatId, title: newTitle || 'Новый чат' } 
+      });
+    }
 
-        setMessages(prev => [...prev, userMessage]);
-        setIsLoading(true);
-        onSendMessage(content);
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
 
-        setTimeout(() => {
-            const aiMessage: MessageType = {
-                id: (Date.now() + 1).toString(),
-                content: 'Это моковый ответ от GigaChat.',
-                role: 'assistant',
-                timestamp: new Date(),
+    try {
+      const chat = state.chats.find(c => c.id === state.activeChatId);
+      const history = chat ? [...chat.messages, userMessage] : [userMessage];
+
+      let fullContent = '';
+      let assistantMessageId = '';
+
+      await sendMessageToGemini(apiKey, history, {
+        model: settings.model,
+        temperature: settings.temperature,
+        topP: settings.topP,
+        maxTokens: settings.maxTokens,
+        files: files?.map(f => ({ mimeType: f.mimeType, data: f.data })),
+        onChunk: (chunk) => {
+          fullContent += chunk;
+          
+          if (!assistantMessageId) {
+            assistantMessageId = (Date.now() + 2).toString();
+            const initialMessage: Message = {
+              id: assistantMessageId,
+              content: fullContent,
+              role: 'assistant',
+              timestamp: new Date().toISOString(),
             };
-            setMessages(prev => [...prev, aiMessage]);
-            setIsLoading(false);
-        }, 2000);
-    };
+            dispatch({ 
+              type: 'ADD_MESSAGE', 
+              payload: { chatId: state.activeChatId!, message: initialMessage } 
+            });
+          } else {
+            dispatch({
+              type: 'UPDATE_LAST_MESSAGE',
+              payload: {
+                chatId: state.activeChatId!,
+                message: { id: assistantMessageId, content: fullContent, role: 'assistant', timestamp: new Date().toISOString() }
+              }
+            });
+          }
+        }
+      });
+    } catch (err: any) {
+      dispatch({ type: 'SET_ERROR', payload: err.message });
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  };
 
-    const handleStopGeneration = () => {
-        setIsLoading(false);
-    };
-
+  if (!currentChat) {
     return (
-        <main className="flex-1 flex flex-col h-screen bg-[var(--color-chat-bg)] min-w-[320px]">
-            {/* Header */}
-            <header className="flex items-center justify-between px-2 xs:px-3 sm:px-4 md:px-6 py-2 xs:py-3 sm:py-4 border-b border-[var(--color-border)] bg-[var(--color-sidebar-bg)]/80 backdrop-blur-md sticky top-0 z-10">
-                <div className="flex items-center gap-1 xs:gap-2 sm:gap-3 md:gap-4 min-w-0 max-w-[70%]">
-                    <button
-                        onClick={onToggleSidebar}
-                        className="lg:hidden p-1.5 xs:p-2 hover:bg-[var(--color-hover)] rounded-lg transition-colors flex-shrink-0"
-                        aria-label="Toggle sidebar"
-                    >
-                        <Menu size={16} className="xs:w-[18px] xs:h-[18px] sm:w-5 sm:h-5 text-[var(--color-text-secondary)]" />
-                    </button>
-
-                    <div className="min-w-0">
-                        <h2 className="text-sm xs:text-base sm:text-lg font-semibold text-[var(--color-text)] truncate">
-                            {chatTitle}
-                        </h2>
-                        <p className="text-xs text-[var(--color-text-muted)] truncate">
-                            {messages.length} {messages.length === 1 ? 'сообщение' :
-                            messages.length >= 2 && messages.length <= 4 ? 'сообщения' : 'сообщений'}
-                        </p>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-0.5 xs:gap-1 sm:gap-2 flex-shrink-0">
-                    <button
-                        onClick={onOpenSettings}
-                        className="p-1.5 xs:p-2 hover:bg-[var(--color-hover)] rounded-lg transition-colors"
-                        title="Настройки"
-                    >
-                        <Settings size={14} className="xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-[var(--color-text-secondary)]" />
-                    </button>
-                </div>
-            </header>
-
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto">
-                <div className="w-full px-2 xs:px-3 sm:px-4 py-3 xs:py-4 sm:py-6 md:py-8">
-                    <div className="max-w-3xl mx-auto">
-                        {messages.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center h-full min-h-[250px] xs:min-h-[300px] sm:min-h-[400px] text-center px-2 xs:px-4">
-                                <div className="w-14 h-14 xs:w-16 xs:h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg mb-3 xs:mb-4 sm:mb-6">
-                                    <span className="text-xl xs:text-2xl sm:text-3xl text-white">💬</span>
-                                </div>
-                                <h3 className="text-base xs:text-lg sm:text-xl font-semibold text-[var(--color-text)] mb-1 xs:mb-2">
-                                    Начните разговор
-                                </h3>
-                                <p className="text-xs xs:text-sm sm:text-base text-[var(--color-text-muted)] max-w-md px-2">
-                                    Задайте вопрос или напишите сообщение
-                                </p>
-                            </div>
-                        ) : (
-                            <MessageList messages={messages} isLoading={isLoading} />
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* Input Area - исправленные отступы */}
-            <div className="border-t border-[var(--color-border)] bg-[var(--color-sidebar-bg)]/50 backdrop-blur-sm">
-                <div className="max-w-3xl mx-auto">
-                    <InputArea
-                        onSendMessage={handleSendMessage}
-                        onStopGeneration={handleStopGeneration}
-                        isLoading={isLoading}
-                    />
-                </div>
-            </div>
-        </main>
+      <div className="flex-1 flex items-center justify-center bg-[var(--color-chat-bg)]">
+         <div className="text-center p-8">
+            <h2 className="text-2xl font-bold mb-2">Выберите чат</h2>
+            <p className="text-[var(--color-text-muted)]">Начните новый разговор или выберите существующий из списка.</p>
+         </div>
+      </div>
     );
+  }
+
+  return (
+    <main className="flex-1 flex flex-col h-screen bg-[var(--color-chat-bg)] overflow-hidden">
+      <header className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-sidebar-bg)]/80 backdrop-blur-md sticky top-0 z-10">
+        <div className="flex items-center gap-4 min-w-0">
+          <button
+            onClick={onToggleSidebar}
+            className="lg:hidden p-2 hover:bg-[var(--color-hover)] rounded-lg transition-colors border border-[var(--color-border)]"
+          >
+            <Menu size={20} className="text-[var(--color-text-secondary)]" />
+          </button>
+
+          <div className="min-w-0">
+            <h2 className="text-lg font-bold text-[var(--color-text)] truncate">
+              {currentChat.title}
+            </h2>
+            <p className="text-xs text-[var(--color-text-muted)] opacity-60 uppercase tracking-widest font-bold">
+              {currentChat.messages.length} {currentChat.messages.length === 1 ? 'сообщение' : 'сообщений'}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={onOpenSettings}
+          className="p-2 hover:bg-[var(--color-hover)] rounded-lg transition-colors border border-[var(--color-border)] text-[var(--color-text-secondary)]"
+          title="Настройки"
+        >
+          <Settings size={20} />
+        </button>
+      </header>
+
+      <MessageList 
+        messages={currentChat.messages} 
+        isLoading={state.isLoading} 
+      />
+
+      <InputArea
+        onSendMessage={handleSendMessage}
+        isLoading={state.isLoading}
+      />
+    </main>
+  );
 };

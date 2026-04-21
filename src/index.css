@@ -1,2 +1,120 @@
 @import "tailwindcss";
-@import "./styles/theme.css";
+
+@theme {
+  --color-bg: var(--color-bg);
+  --color-text: var(--color-text);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+  --color-sidebar-bg: var(--color-sidebar-bg);
+  --color-chat-bg: var(--color-chat-bg);
+  --color-input-bg: var(--color-input-bg);
+  --color-hover: var(--color-hover);
+  --color-border: var(--color-border);
+  --color-border-light: var(--color-border-light);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-message-user: var(--color-message-user);
+  --color-message-user-text: var(--color-message-user-text);
+  --color-message-assistant: var(--color-message-assistant);
+  --color-message-assistant-text: var(--color-message-assistant-text);
+}
+
+:root {
+  --color-bg: #ffffff;
+  --color-text: #1a1a1a;
+  --color-text-secondary: #4b5563;
+  --color-text-muted: #6b7280;
+
+  --color-sidebar-bg: #f9fafb;
+  --color-chat-bg: #ffffff;
+  --color-input-bg: #f3f4f6;
+  --color-hover: #f3f4f6;
+
+  --color-message-user: #2563eb;
+  --color-message-user-text: #ffffff;
+  --color-message-assistant: #f3f4f6;
+  --color-message-assistant-text: #1a1a1a;
+
+  --color-border: #e5e7eb;
+  --color-border-light: #f3f4f6;
+
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+}
+
+.dark {
+  --color-bg: #030712;
+  --color-text: #f3f4f6;
+  --color-text-secondary: #9ca3af;
+  --color-text-muted: #6b7280;
+
+  --color-sidebar-bg: #0f172a;
+  --color-chat-bg: #030712;
+  --color-input-bg: #1e293b;
+  --color-hover: #1e293b;
+
+  --color-message-user: #3b82f6;
+  --color-message-user-text: #ffffff;
+  --color-message-assistant: #1e293b;
+  --color-message-assistant-text: #f3f4f6;
+
+  --color-border: #1e293b;
+  --color-border-light: #0f172a;
+
+  --color-accent: #3b82f6;
+  --color-accent-hover: #2563eb;
+
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  @apply antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-700 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-600;
+}
+
+.message-content {
+  @apply leading-relaxed;
+}
+
+.message-content p {
+  @apply mb-4 last:mb-0;
+}
+
+.message-content ul, .message-content ol {
+  @apply mb-4 ml-6;
+}
+
+.message-content li {
+  @apply mb-1;
+}
+
+.prose pre {
+  @apply p-0 m-0 bg-transparent;
+}
+
+.prose code {
+  @apply font-mono;
+}
