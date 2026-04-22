@@ -1,4 +1,4 @@
-# Gemini Chat App
+# Gemini AI Chat
 
 Это приложение для чата с ИИ на базе Gemini API, построенное с использованием React, Vite и Tailwind CSS.
 
