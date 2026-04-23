@@ -176,27 +176,32 @@ export const InputArea: React.FC<InputAreaProps> = ({
                 placeholder="Спросите Gemini..."
                 disabled={disabled || isLoading}
                 rows={1}
-                className="w-full bg-[var(--color-input-bg)] border border-[var(--color-border)] rounded-xl py-3 px-4 pr-12 text-sm text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none disabled:opacity-50 transition-all max-h-[200px]"
+                className="w-full bg-[var(--color-input-bg)] border border-[var(--color-border)] rounded-2xl py-4 px-5 pr-14 text-sm md:text-base text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none disabled:opacity-50 transition-all max-h-[200px]"
             />
 
-              <div className="absolute right-3 bottom-2.5">
+              <div className="absolute right-3 bottom-3 md:bottom-3.5">
                 {isLoading ? (
                     <button
                         type="button"
                         onClick={onStopGeneration}
-                        className="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors shadow-lg shadow-red-500/20"
+                        className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors shadow-lg shadow-red-500/20"
                         aria-label="Остановить генерацию"
                     >
-                      <Square size={14} fill="currentColor" />
+                      <Square size={16} fill="currentColor" />
                     </button>
                 ) : (
                     <button
                         type="submit"
                         disabled={(!input.trim() && attachedFiles.length === 0) || disabled}
-                        className="p-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20 disabled:shadow-none"
+                        className={`p-2 rounded-xl transition-all shadow-sm disabled:shadow-none disabled:opacity-30 disabled:grayscale
+                    ${!input.trim() && attachedFiles.length === 0
+                            ? 'bg-[var(--color-send-bg)] text-[var(--color-send-text)]'
+                            : 'bg-blue-600 text-white dark:bg-[var(--color-send-bg)] dark:text-[var(--color-send-text)]'
+                        }
+                  `}
                         aria-label="Отправить"
                     >
-                      <Send size={14} />
+                      <Send size={16} />
                     </button>
                 )}
               </div>

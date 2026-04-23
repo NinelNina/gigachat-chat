@@ -17,6 +17,8 @@
   --color-message-user-text: var(--color-message-user-text);
   --color-message-assistant: var(--color-message-assistant);
   --color-message-assistant-text: var(--color-message-assistant-text);
+  --color-send-bg: var(--color-send-bg);
+  --color-send-text: var(--color-send-text);
 }
 
 :root {
@@ -40,6 +42,9 @@
 
   --color-accent: #2563eb;
   --color-accent-hover: #1d4ed8;
+
+  --color-send-bg: #0d1117;
+  --color-send-text: #ffffff;
 
   --color-success: #10b981;
   --color-warning: #f59e0b;
@@ -67,6 +72,9 @@
 
   --color-accent: #3b82f6;
   --color-accent-hover: #2563eb;
+
+  --color-send-bg: #0d1117;
+  --color-send-text: #ffffff;
 
   --color-success: #34d399;
   --color-warning: #fbbf24;

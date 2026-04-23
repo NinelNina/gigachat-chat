@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Copy, Check, Bot, User } from 'lucide-react';
@@ -68,8 +72,32 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
                         : 'bg-[var(--color-message-assistant)] text-[var(--color-text)] rounded-tl-sm border border-[var(--color-border)]'
                     }
           `}>
-                        <div className="prose prose-sm dark:prose-invert max-w-full break-words overflow-hidden">
+                        <div className={`
+              prose prose-sm md:prose-base dark:prose-invert max-w-full break-words overflow-hidden ${isUser ? 'text-white' : 'text-[var(--color-text)]'}
+              [&_h1]:!font-normal [&_h2]:!font-normal [&_h3]:!font-normal [&_h4]:!font-normal [&_h5]:!font-normal [&_h6]:!font-normal
+              [&_h1]:!text-2xl [&_h2]:!text-xl [&_h3]:!text-lg [&_h4]:!text-base [&_h5]:!text-base [&_h6]:!text-base
+              [&_h1]:!mt-6 [&_h2]:!mt-6 [&_h3]:!mt-6 [&_h4]:!mt-6 [&_h5]:!mt-6 [&_h6]:!mt-6
+              [&_h1]:!mb-4 [&_h2]:!mb-4 [&_h3]:!mb-4 [&_h4]:!mb-4 [&_h5]:!mb-4 [&_h6]:!mb-4
+              [&_h1:first-child]:!mt-0 [&_h2:first-child]:!mt-0 [&_h3:first-child]:!mt-0 [&_h4:first-child]:!mt-0 [&_h5:first-child]:!mt-0 [&_h6:first-child]:!mt-0
+              [&_h2]:!border-none [&_h2]:!pb-0
+              prose-p:leading-relaxed prose-p:mb-4 prose-p:last-of-type:mb-0
+              prose-a:text-blue-500 prose-a:no-underline hover:prose-a:underline
+              prose-hr:border-[var(--color-border)] prose-hr:my-6 prose-hr:opacity-50
+              prose-strong:font-semibold ${isUser ? 'prose-strong:text-white' : 'prose-strong:text-[var(--color-text)]'}
+              prose-ul:list-disc prose-ul:pl-5
+              prose-ol:list-decimal prose-ol:pl-5
+              prose-li:my-1
+              prose-table:border-collapse prose-table:w-full prose-table:my-6
+              prose-th:border prose-th:border-[var(--color-border)] prose-th:bg-[var(--color-hover)] prose-th:px-4 prose-th:py-2 prose-th:text-left
+              prose-td:border prose-td:border-[var(--color-border)] prose-td:px-4 prose-td:py-2
+              prose-blockquote:border-l-4 prose-blockquote:border-[var(--color-border)] prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-[var(--color-text-muted)]
+              prose-pre:bg-[#1e1e1e] prose-pre:text-white prose-pre:rounded-xl prose-pre:p-4 prose-pre:overflow-x-auto
+              prose-code:bg-[var(--color-hover)] prose-code:text-[var(--color-text)] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:font-mono prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
+              ${isUser ? '[&_*]:text-white prose-a:text-blue-200' : ''}
+            `}>
                             <ReactMarkdown
+                                remarkPlugins={[remarkGfm, remarkMath]}
+                                rehypePlugins={[rehypeKatex]}
                                 components={{
                                     code({ node, inline, className, children, ...props }: any) {
                                         const match = /language-(\w+)/.exec(className || '');
@@ -96,7 +124,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
                                                 </SyntaxHighlighter>
                                             </div>
                                         ) : (
-                                            <code className="bg-black/10 px-1 rounded text-sm font-mono" {...props}>
+                                            <code className="font-mono" {...props}>
                                                 {children}
                                             </code>
                                         );
